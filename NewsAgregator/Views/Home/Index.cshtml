@@ -1,0 +1,158 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    
+}
+@section Scripts {
+    <script>
+    const pageLoadCount = 10;
+    let startIndex = 0;
+    let finalPage = false;
+    let sourcesSer = '@Html.Raw(Json.Serialize(ViewBag.sources))'
+    let sources =  JSON.parse(sourcesSer);
+    let oldSources = sources;
+    function formatItem(item) {
+            let replaceMap = new Map([
+                ["*{url}", item["url"]],
+                ["*{title}", item["title"]],
+                ["*{description}", item["description"]],
+                ["*{category}", item["category"]],
+                ["*{creationDate}", item["creationDate"]],
+                ["*{sourceName}", item["sourceName"]]
+            ]);
+            let template = $("#tmpl").html();
+            for (let [key, value] of replaceMap.entries()) {
+                template = template.replace(key, value);
+            }
+            return template
+    }
+    function addAllToList(data) {
+        var list = "";
+        if (data.length==0) {
+            $("#list").children().last().after("<p>Новости по ващшему запросу не были найдены</p>")
+        }
+        else {
+            for (let i = 0; i < data.length; i++) {
+                list += formatItem(data[i]);
+            }   
+            $("#list").children().last().after(list);
+        }
+        
+    }
+    async function fetchNews(func) {
+        $("#list").children().last().after($("#loader").html());
+        var sourcesString = ""
+        for (let i=0;i<sources.length;i++) {
+            sourcesString+=`"${sources[i]}",`
+        }
+        var postBody = {
+            "amount": pageLoadCount,
+            "startIndex": startIndex,
+            "sources": sources
+        }
+        let response = await fetch(
+            "/api/News", {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+              },
+              body: JSON.stringify(postBody)
+            })
+        
+        let result = await response.json();
+        console.log(result);
+        startIndex+=pageLoadCount;
+            finalPage = result["final"]
+        $("#list").children(".loader").remove();
+        //console.log(result);
+
+        addAllToList(result["items"]);
+        func();
+    };
+     function isInViewport(tag) {
+        var elementTop = $(tag).offset().top;
+        var elementBottom = elementTop + $(tag).outerHeight();
+        var viewportTop = $(window).scrollTop();
+        var viewportBottom = viewportTop + $(window).height();
+        return elementBottom > viewportTop && elementTop < viewportBottom;
+     };
+    function handleScroll(e) {
+        if (finalPage) {return;}
+         if (isInViewport("#viewportEnd")) {
+             fetchNews(()=>{
+                $(window).one('resize scroll', handleScroll);
+             })
+         }
+         else {
+             $(window).one('resize scroll', handleScroll);
+         }
+     };
+     function resetList() {
+         sources = [];
+         $(".sourceCheckbox").each((i, el) => {
+             if (el.checked) 
+                sources.push(el.value);
+         });
+         if (sources == oldSources) 
+            return ;
+         if (!finalPage) {
+             $(window).off('resize scroll', handleScroll);
+         }
+         final = false;
+         oldSources = sources;
+         startIndex = 0;
+         $("#list").children(".list_item").remove();
+         fetchNews(() => {
+             $(window).one('resize scroll', handleScroll)
+         });
+     }
+     onload = (event) => {
+        fetchNews(()=>{
+            $(window).one('resize scroll', handleScroll);
+        })
+     };
+</script>
+}
+<div class="row justify-content-evenly">
+    <div class="col-2">
+        <div class=" p-2 bg-info rounded-3 mt-5">
+            <form onsubmit="event.preventDefault(); resetList()">
+                @foreach (var source in ViewBag.sources)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input sourceCheckbox" checked type="checkbox" value="@source" on id="Check@source">
+                        <label class="form-check-label" for="Check@source">
+                            @source
+                        </label>
+                    </div>
+                }
+                <button type="submit" class="btn btn-primary mb-2">Принять фильтры</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-10">
+        <div>
+            <div class="row justify-content-center gx-5" id="list">
+                <div class="nullEl"></div>
+            </div>
+            <div id="viewportEnd" style="height:100px;"></div>
+        </div>
+    </div>
+</div>
+
+<template id="tmpl">
+        <div class="col-md-8 mb-4 bg-info border border-info p-3 rounded-3 list_item">
+            <span class="badge bg-danger px-2 py-1 shadow-1-strong mb-3">*{sourceName}</span>
+            <span class="badge bg-warning px-2 py-1 shadow-1-strong mb-3">*{category}</span>
+            <span class="badge bg-info px-2 py-1 shadow-1-strong mb-3">*{creationDate}</span>
+            <h4><strong>*{title}</strong></h4>
+            <p class="text">
+                    *{description}
+            </p>
+            <a href="*{url}" class="btn btn-primary">Далее</a>
+        </div>
+</template>
+<template id="loader">
+        <div class="col-2 loader">
+            <img src="~/loading.gif" />
+        </div>
+</template>
