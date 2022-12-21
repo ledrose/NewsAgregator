@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using NewsAgregator.ViewModels;
 using System.ServiceModel.Syndication;
-using VueProjectBack.Models;
+using NewsAgregator.Models;
 
-namespace VueProjectBack.Mapping
+namespace NewsAgregator.Mapping
 {
     public class MappingProfile : Profile
     {

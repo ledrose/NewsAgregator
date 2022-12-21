@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using VueProjectBack.Data;
-using VueProjectBack.Mapping;
-using VueProjectBack.Services;
+using NewsAgregator.Data;
+using NewsAgregator.Mapping;
+using NewsAgregator.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +10,8 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 builder.Services.AddDbContext<CustomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-builder.Services.AddHostedService<RSSListener>();
+builder.Services.AddSingleton<RSSListener>();
+builder.Services.AddHostedService<MainListener>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();

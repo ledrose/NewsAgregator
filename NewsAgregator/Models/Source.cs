@@ -1,13 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace VueProjectBack.Models
+namespace NewsAgregator.Models
 {
     public class Source
     {
         [Key]
         public string Name { get; set; }
+        [Required]
         public string RSSUrl { get; set; }
-        public List<NewsItem> NewsItems { get; set; }
+        public List<NewsItem>? NewsItems { get; set; }
 
     }
 }

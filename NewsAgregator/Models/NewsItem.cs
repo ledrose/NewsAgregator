@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace VueProjectBack.Models
+namespace NewsAgregator.Models
 {
     public class NewsItem
     {

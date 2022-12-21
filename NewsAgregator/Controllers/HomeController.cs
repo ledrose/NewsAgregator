@@ -2,7 +2,7 @@
 using NewsAgregator.Models;
 using NewsAgregator.ViewModels;
 using System.Diagnostics;
-using VueProjectBack.Data;
+using NewsAgregator.Data;
 
 namespace NewsAgregator.Controllers
 {

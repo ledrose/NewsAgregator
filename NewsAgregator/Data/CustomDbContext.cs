@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VueProjectBack.Models;
+using NewsAgregator.Models;
 
-namespace VueProjectBack.Data
+namespace NewsAgregator.Data
 {
      public class CustomDbContext : DbContext
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using VueProjectBack.Models;
+using NewsAgregator.Models;
 
 namespace NewsAgregator.ViewModels
 {

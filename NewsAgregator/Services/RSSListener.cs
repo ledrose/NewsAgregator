@@ -3,27 +3,16 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.ServiceModel.Syndication;
 using System.Xml;
 using HtmlAgilityPack;
-using VueProjectBack.Data;
-using VueProjectBack.Models;
+using NewsAgregator.Data;
+using NewsAgregator.Models;
 
-namespace VueProjectBack.Services 
+namespace NewsAgregator.Services 
 {
-    public class RSSListener : BackgroundService
+    public class RSSListener 
     {
         private IServiceProvider _serviceProvider;
-        private IMapper _mapper;
-        public RSSListener(IServiceProvider serviceProvider,IMapper mapper) {
+        public RSSListener(IServiceProvider serviceProvider) {
             _serviceProvider = serviceProvider;
-            _mapper = mapper;
-        }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                update();
-                await Task.Delay(new TimeSpan(0, 30, 0));
-            }
         }
         public void update()
         {

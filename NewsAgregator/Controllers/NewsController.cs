@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using VueProjectBack.Data;
+using NewsAgregator.Data;
 using Newtonsoft.Json.Linq;
 using NewsAgregator.ViewModels;
 using AutoMapper;
 
-namespace VueProjectBack.Controllers
+namespace NewsAgregator.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
