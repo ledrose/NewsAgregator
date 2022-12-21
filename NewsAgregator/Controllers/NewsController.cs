@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VueProjectBack.Data;
-using VueProjectBack.Models;
 using Newtonsoft.Json.Linq;
 using NewsAgregator.ViewModels;
 using AutoMapper;
@@ -15,6 +14,7 @@ namespace VueProjectBack.Controllers
     {
         private CustomDbContext _db;
         private IMapper _mapper;
+        private readonly DateTime minDateTime = new DateTime(2010, 1, 1);
         public NewsController(CustomDbContext db, IMapper mapper)
         {
             _db = db;
@@ -34,14 +34,25 @@ namespace VueProjectBack.Controllers
                 if (amount < 1 || amount > 30) amount = 30;
                 int startIndex = data.StartIndex;
                 var sources = data.Sources;
+                var startTime =  data.StartTime;
+                if (data.StartTime>=minDateTime)
+                {
+                    startTime = data.StartTime.AddHours(-data.TimeOffsetInHours);
+                }
+                var endTime = DateTime.Now;
+                if (data.EndTime>minDateTime)
+                {
+                    endTime = data.EndTime.AddHours(-data.TimeOffsetInHours);
+                }                
                 var items = _db.NewsItems
                     .Where(p => 
                         data.Sources.Contains(p.SourceName) &&
-                        p.CreationDate>data.StartTime &&
-                        p.CreationDate>data.EndTime &&
+                        p.CreationDate>startTime &&
+                        p.CreationDate<endTime &&
                         p.Title.Contains(data.SearchQuery))
                     .OrderByDescending(p => p.CreationDate).Skip(startIndex).Take(amount)
                     .ToList();
+                items.ForEach(p => p.CreationDate = p.CreationDate.AddHours(data.TimeOffsetInHours));
                 var itemsMapped = new List<NewsOutputItemModel>();
                 items.ForEach(item => itemsMapped.Add(_mapper.Map<NewsOutputItemModel>(item)));
                 var output = new NewsOutputModel {

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace VueProjectBack.Migrations
+namespace NewsAgregator.Migrations
 {
     /// <inheritdoc />
     public partial class initial : Migration
@@ -55,16 +55,9 @@ namespace VueProjectBack.Migrations
                 values: new object[,]
                 {
                     { "Лента", "https://lenta.ru/rss" },
-                    { "Медуза", "https://meduza.io/rss/all" },
-                    { "РИА новости", "https://ria.ru/export/rss2/archive/index.xml" },
                     { "Mail.ru", "https://news.mail.ru/rss/" },
                     { "RT", "https://russian.rt.com/rss" }
                 });
-
-            migrationBuilder.InsertData(
-                table: "NewsItems",
-                columns: new[] { "Id", "Category", "CreationDate", "Description", "SourceName", "Title", "Url" },
-                values: new object[] { 1, "Unknown", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "", "Mail.ru", "Unknown", "" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_NewsItems_SourceName",

@@ -73,18 +73,16 @@ namespace VueProjectBack.Services
             var list = new List<NewsItem>();
             foreach (var item in feed.Items)
             {
-                if (item.PublishDate.DateTime>lastDate)
+                if (item.PublishDate.UtcDateTime>lastDate)
                 {
                     var a = new NewsItem
                     {
                         Category = item.Categories?.FirstOrDefault()?.Name ?? "",
-                        CreationDate = item.PublishDate.DateTime,
-                        Description = item.Summary?.Text ?? "",
+                        CreationDate = item.PublishDate.UtcDateTime,
+                        Description = checkHtml(item.Summary?.Text ?? ""),
                         Title = item.Title?.Text ?? "",
-                        Url = checkHtml(item.Links?.FirstOrDefault()?.Uri?.OriginalString ?? "")
+                        Url = item.Links?.FirstOrDefault()?.Uri?.OriginalString ?? ""
                     };
-                    
-                    
                     list.Add(a);
                     //list.Add(_mapper.Map<NewsItem>(item));
                 }

@@ -12,7 +12,8 @@
     let endTime = "";
     let searchQuery = "";
     let sources =  JSON.parse('@sourcesSer');
-    function formatItem(item) {
+    function formatItem(item) { 
+        console.log(item["creationDate"]);
             let replaceMap = new Map([
                 ["*{url}", item["url"]],
                 ["*{title}", item["title"]],
@@ -53,7 +54,9 @@
             "startTime": startTime,
             "endTime": endTime,
             "searchQuery": searchQuery,
+            "timeOffsetInHours" : -(new Date().getTimezoneOffset())/60
         }
+        console.log(JSON.stringify(postBody));
         let response = await fetch(
             "/api/News", {
               method: 'POST',
@@ -98,7 +101,7 @@
                 sources.push(el.value);
          });
          startTime = $("#startTime").val();
-         endTime = $("#startTime").val();
+         endTime = $("#endTime").val();
          searchQuery = $("#searchQuery").val();
          if (!finalPage) {
              $(window).off('resize scroll', handleScroll);
@@ -117,6 +120,7 @@
             $(window).one('resize scroll', handleScroll);
         })
      };
+     
 </script>
 }
 <div class="row justify-content-evenly">

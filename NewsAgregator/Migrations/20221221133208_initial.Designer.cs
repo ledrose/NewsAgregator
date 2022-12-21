@@ -9,10 +9,10 @@ using VueProjectBack.Data;
 
 #nullable disable
 
-namespace VueProjectBack.Migrations
+namespace NewsAgregator.Migrations
 {
     [DbContext(typeof(CustomDbContext))]
-    [Migration("20221219052418_initial")]
+    [Migration("20221221133208_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -61,18 +61,6 @@ namespace VueProjectBack.Migrations
                     b.HasIndex("SourceName");
 
                     b.ToTable("NewsItems");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Category = "Unknown",
-                            CreationDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "",
-                            SourceName = "Mail.ru",
-                            Title = "Unknown",
-                            Url = ""
-                        });
                 });
 
             modelBuilder.Entity("VueProjectBack.Models.Source", b =>
@@ -98,16 +86,6 @@ namespace VueProjectBack.Migrations
                         {
                             Name = "RT",
                             RSSUrl = "https://russian.rt.com/rss"
-                        },
-                        new
-                        {
-                            Name = "Медуза",
-                            RSSUrl = "https://meduza.io/rss/all"
-                        },
-                        new
-                        {
-                            Name = "РИА новости",
-                            RSSUrl = "https://ria.ru/export/rss2/archive/index.xml"
                         },
                         new
                         {

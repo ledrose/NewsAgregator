@@ -8,5 +8,6 @@ namespace VueProjectBack.Models
         public string Name { get; set; }
         public string RSSUrl { get; set; }
         public List<NewsItem> NewsItems { get; set; }
+
     }
 }
