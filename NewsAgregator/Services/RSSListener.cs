@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.ServiceModel.Syndication;
 using System.Xml;
+using HtmlAgilityPack;
 using VueProjectBack.Data;
 using VueProjectBack.Models;
 
@@ -61,11 +62,13 @@ namespace VueProjectBack.Services
 
         private List<NewsItem> readUrl(Source source, DateTime lastDate)
         {
+            /*
             XmlUrlResolver resolver = new XmlUrlResolver();
             resolver.Credentials = System.Net.CredentialCache.DefaultCredentials;
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.XmlResolver = resolver;
-            var reader = XmlReader.Create(source.RSSUrl,settings);
+            */
+            var reader = XmlReader.Create(source.RSSUrl);
             var feed =SyndicationFeed.Load(reader);
             var list = new List<NewsItem>();
             foreach (var item in feed.Items)
@@ -78,9 +81,8 @@ namespace VueProjectBack.Services
                         CreationDate = item.PublishDate.DateTime,
                         Description = item.Summary?.Text ?? "",
                         Title = item.Title?.Text ?? "",
-                        Url = item.Links?.FirstOrDefault()?.Uri?.OriginalString ?? ""
+                        Url = checkHtml(item.Links?.FirstOrDefault()?.Uri?.OriginalString ?? "")
                     };
-
                     
                     
                     list.Add(a);
@@ -88,6 +90,13 @@ namespace VueProjectBack.Services
                 }
             }
             return list;
+        }
+
+        private String checkHtml(String str)
+        {
+            var doc = new HtmlDocument();
+            doc.LoadHtml(str);
+            return doc.DocumentNode.InnerText.Replace("/n","").Trim();
         }
 
     }

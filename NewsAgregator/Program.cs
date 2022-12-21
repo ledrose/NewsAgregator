@@ -10,7 +10,7 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 builder.Services.AddDbContext<CustomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-//builder.Services.AddHostedService<RSSListener>();
+builder.Services.AddHostedService<RSSListener>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
