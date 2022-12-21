@@ -1,15 +1,17 @@
-﻿@{
+﻿@model NewsAgregator.ViewModels.NewsInputModel;
+@{
     ViewData["Title"] = "Home Page";
-    
+    var sourcesSer = Html.Raw(Json.Serialize(Model.Sources));
 }
 @section Scripts {
     <script>
     const pageLoadCount = 10;
     let startIndex = 0;
     let finalPage = false;
-    let sourcesSer = '@Html.Raw(Json.Serialize(ViewBag.sources))'
-    let sources =  JSON.parse(sourcesSer);
-    let oldSources = sources;
+    let startTime = "";
+    let endTime = "";
+    let searchQuery = "";
+    let sources =  JSON.parse('@sourcesSer');
     function formatItem(item) {
             let replaceMap = new Map([
                 ["*{url}", item["url"]],
@@ -27,16 +29,16 @@
     }
     function addAllToList(data) {
         var list = "";
-        if (data.length==0) {
-            $("#list").children().last().after("<p>Новости по ващшему запросу не были найдены</p>")
-        }
-        else {
+        
+        if (data.length!=0) {
             for (let i = 0; i < data.length; i++) {
                 list += formatItem(data[i]);
             }   
             $("#list").children().last().after(list);
         }
-        
+        else if (startIndex == 0) {
+            $("#list").children().last().after("<p>Новости по вашему запросу не были найдены</p>")
+        }
     }
     async function fetchNews(func) {
         $("#list").children().last().after($("#loader").html());
@@ -47,7 +49,10 @@
         var postBody = {
             "amount": pageLoadCount,
             "startIndex": startIndex,
-            "sources": sources
+            "sources": sources,
+            "startTime": startTime,
+            "endTime": endTime,
+            "searchQuery": searchQuery,
         }
         let response = await fetch(
             "/api/News", {
@@ -60,8 +65,8 @@
         
         let result = await response.json();
         console.log(result);
-        startIndex+=pageLoadCount;
-            finalPage = result["final"]
+        startIndex+=result["items"].length;
+        finalPage = result["final"]
         $("#list").children(".loader").remove();
         //console.log(result);
 
@@ -92,13 +97,13 @@
              if (el.checked) 
                 sources.push(el.value);
          });
-         if (sources == oldSources) 
-            return ;
+         startTime = $("#startTime").val();
+         endTime = $("#startTime").val();
+         searchQuery = $("#searchQuery").val();
          if (!finalPage) {
              $(window).off('resize scroll', handleScroll);
          }
          final = false;
-         oldSources = sources;
          startIndex = 0;
          $("#list").children(".list_item").remove();
          fetchNews(() => {
@@ -106,6 +111,8 @@
          });
      }
      onload = (event) => {
+        startTime = $("#startTime").val();
+        endTime = $("#startTime").val();
         fetchNews(()=>{
             $(window).one('resize scroll', handleScroll);
         })
@@ -113,23 +120,30 @@
 </script>
 }
 <div class="row justify-content-evenly">
-    <div class="col-2">
+    <div class="col-3">
         <div class=" p-2 bg-info rounded-3 mt-5">
             <form onsubmit="event.preventDefault(); resetList()">
-                @foreach (var source in ViewBag.sources)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input sourceCheckbox" checked type="checkbox" value="@source" on id="Check@source">
-                        <label class="form-check-label" for="Check@source">
-                            @source
-                        </label>
-                    </div>
-                }
-                <button type="submit" class="btn btn-primary mb-2">Принять фильтры</button>
+                    @foreach (var source in Model.Sources)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input sourceCheckbox" checked type="checkbox" value="@source" on id="Check@source">
+                            <label class="form-check-label" for="Check@source">
+                                @source
+                            </label>
+                        </div>
+                    }
+                    <label class="form-check-label" for="startTime">Начальное время</label>
+                    <input id="startTime" class="input form-control" asp-for="StartTime" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                    <label class="form-check-label" for="endTime">Конечное время</label>
+                    <input id="endTime" class="input form-control"  asp-for="EndTime" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                    <label class="form-check-label" for="searchQuery">Запрос поиска</label>
+                    <input id="searchQuery" class="input form-control" asp-for="SearchQuery" asp-format="{0:yyyy-MM-ddTHH:mm}" />
+                    <div style="height:20px;"></div>
+                    <button type="submit" class="btn btn-primary mb-2">Принять фильтры</button>
             </form>
         </div>
     </div>
-    <div class="col-10">
+    <div class="col-9">
         <div>
             <div class="row justify-content-center gx-5" id="list">
                 <div class="nullEl"></div>

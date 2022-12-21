@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsAgregator.Models;
+using NewsAgregator.ViewModels;
 using System.Diagnostics;
 using VueProjectBack.Data;
 
@@ -17,13 +18,12 @@ namespace NewsAgregator.Controllers
 
         public IActionResult Index()
         {
-            var list = new List<String>();
+            var model = new NewsInputModel();
             foreach (var source in _db.Sources)
             {
-                list.Add(source.Name);
+                model.Sources.Add(source.Name);
             }
-            ViewBag.sources = list;
-            return View();
+            return View(model);
         }
 
         public IActionResult Privacy()

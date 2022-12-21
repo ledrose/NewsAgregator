@@ -61,7 +61,11 @@ namespace VueProjectBack.Services
 
         private List<NewsItem> readUrl(Source source, DateTime lastDate)
         {
-            var reader = XmlReader.Create(source.RSSUrl);
+            XmlUrlResolver resolver = new XmlUrlResolver();
+            resolver.Credentials = System.Net.CredentialCache.DefaultCredentials;
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.XmlResolver = resolver;
+            var reader = XmlReader.Create(source.RSSUrl,settings);
             var feed =SyndicationFeed.Load(reader);
             var list = new List<NewsItem>();
             foreach (var item in feed.Items)
@@ -70,12 +74,15 @@ namespace VueProjectBack.Services
                 {
                     var a = new NewsItem
                     {
-                        Category = item.Categories?.First().Name ?? "",
+                        Category = item.Categories?.FirstOrDefault()?.Name ?? "",
                         CreationDate = item.PublishDate.DateTime,
                         Description = item.Summary?.Text ?? "",
                         Title = item.Title?.Text ?? "",
-                        Url = item.Links?.First().Uri?.OriginalString ?? "",
+                        Url = item.Links?.FirstOrDefault()?.Uri?.OriginalString ?? ""
                     };
+
+                    
+                    
                     list.Add(a);
                     //list.Add(_mapper.Map<NewsItem>(item));
                 }

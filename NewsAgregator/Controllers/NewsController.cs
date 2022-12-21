@@ -35,7 +35,11 @@ namespace VueProjectBack.Controllers
                 int startIndex = data.StartIndex;
                 var sources = data.Sources;
                 var items = _db.NewsItems
-                    .Where(p => sources.Contains(p.SourceName))
+                    .Where(p => 
+                        data.Sources.Contains(p.SourceName) &&
+                        p.CreationDate>data.StartTime &&
+                        p.CreationDate>data.EndTime &&
+                        p.Title.Contains(data.SearchQuery))
                     .OrderByDescending(p => p.CreationDate).Skip(startIndex).Take(amount)
                     .ToList();
                 var itemsMapped = new List<NewsOutputItemModel>();
