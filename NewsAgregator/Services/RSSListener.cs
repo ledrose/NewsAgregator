@@ -5,13 +5,15 @@ using System.Xml;
 using HtmlAgilityPack;
 using NewsAgregator.Data;
 using NewsAgregator.Models;
+using NewsAgregator.Services.Interafaces;
 
-namespace NewsAgregator.Services 
+namespace NewsAgregator.Services
 {
-    public class RSSListener 
+    public class RSSListener : INewsListener
     {
         private IServiceProvider _serviceProvider;
-        public RSSListener(IServiceProvider serviceProvider) {
+        public RSSListener(IServiceProvider serviceProvider)
+        {
             _serviceProvider = serviceProvider;
         }
         public void update()
@@ -36,12 +38,12 @@ namespace NewsAgregator.Services
                         sourceList = readUrl(source, lastDate);
                         sourceList.ForEach(p => p.SourceName = source.Name);
                         list.AddRange(sourceList);
-                    }           
+                    }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.ToString()+"Error in :"+ source.Name);
+                        Console.WriteLine(ex.ToString() + "Error in :" + source.Name);
                     }
-                    
+
                 }
 
                 scope.ServiceProvider.GetService<CustomDbContext>()!.NewsItems.AddRange(list);
@@ -58,11 +60,11 @@ namespace NewsAgregator.Services
             settings.XmlResolver = resolver;
             */
             var reader = XmlReader.Create(source.RSSUrl);
-            var feed =SyndicationFeed.Load(reader);
+            var feed = SyndicationFeed.Load(reader);
             var list = new List<NewsItem>();
             foreach (var item in feed.Items)
             {
-                if (item.PublishDate.UtcDateTime>lastDate)
+                if (item.PublishDate.UtcDateTime > lastDate)
                 {
                     var a = new NewsItem
                     {
@@ -83,7 +85,7 @@ namespace NewsAgregator.Services
         {
             var doc = new HtmlDocument();
             doc.LoadHtml(str);
-            return doc.DocumentNode.InnerText.Replace("/n","").Trim();
+            return doc.DocumentNode.InnerText.Replace("/n", "").Trim();
         }
 
     }
