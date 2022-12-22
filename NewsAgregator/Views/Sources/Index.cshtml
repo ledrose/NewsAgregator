@@ -21,7 +21,8 @@
             <thead>
                 <tr>
                     <td>Имя</td>
-                    <td>Канал rss</td>
+                    <td>Тип</td>
+                    <td>Канал rss или телеграмма</td>
                 </tr>
             </thead>
             <tbody>
@@ -29,7 +30,8 @@
                 {
                     <tr>
                         <td width="20%">@obj.Name</td>
-                        <td width="60%">@obj.RSSUrl</td>
+                        <td width="60%">@obj.Type.ToString()</td>
+                        <td width="60%">@obj.Link</td>
                         <td width="30%">
                             <div class="btn-group w-75" role="group">
                                 <a asp-action="Edit" asp-route-Id="@obj.Name" asp-controller="Sources" class="btn btn-primary mx-2">

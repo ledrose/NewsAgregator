@@ -11,6 +11,7 @@ builder.Services.AddDbContext<CustomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddSingleton<RSSListener>();
+builder.Services.AddSingleton<TelegramListener>();
 builder.Services.AddHostedService<MainListener>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
