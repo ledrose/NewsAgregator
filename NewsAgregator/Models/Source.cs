@@ -4,7 +4,9 @@ namespace NewsAgregator.Models
 {
     public enum SourceType
     {
-        Rss,
+        [Display(Name = "Rss")]
+        Rss, 
+        [Display(Name = "Телеграмм")]
         Telegram
     }
     public class Source

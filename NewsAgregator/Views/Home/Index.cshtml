@@ -94,7 +94,7 @@
              $(window).one('resize scroll', handleScroll);
          }
      };
-     function resetList() {
+     function initData() {
          sources = [];
          $(".sourceCheckbox").each((i, el) => {
              if (el.checked) 
@@ -103,6 +103,9 @@
          startTime = $("#startTime").val();
          endTime = $("#endTime").val();
          searchQuery = $("#searchQuery").val();
+     }
+     function resetList() {
+         initData();
          if (!finalPage) {
              $(window).off('resize scroll', handleScroll);
          }
@@ -114,8 +117,7 @@
          });
      }
      onload = (event) => {
-        startTime = $("#startTime").val();
-        endTime = $("#startTime").val();
+        initData();
         fetchNews(()=>{
             $(window).one('resize scroll', handleScroll);
         })

@@ -57,12 +57,12 @@ namespace NewsAgregator.Services
             var lastMsgId = ((ChannelFull)(await _client.Channels_GetFullChannel(channelInput)).full_chat).read_inbox_max_id;
             var mesArr = new List<InputMessageID>();
             Console.WriteLine(Enumerable.Range(lastMsgId - 10, lastMsgId + 1));
-            Enumerable.Range(lastMsgId - 20, 20).ToList().ForEach((i) => mesArr.Add((InputMessageID)(new InputMessageID().id = i)));
+            Enumerable.Range(lastMsgId - 19, 20).ToList().ForEach((i) => mesArr.Add((InputMessageID)(new InputMessageID().id = i)));
             var mesList = (Messages_ChannelMessages)(await _client.Channels_GetMessages(channelInput, mesArr.ToArray()));
             var list = new List<NewsItem>();
             foreach (Message item in mesList.messages)
             {
-                if (item.Date.ToUniversalTime() > lastDate)
+                if (item.Date > lastDate)
                 {
                     var a = new NewsItem
                     {
