@@ -18,7 +18,8 @@ namespace NewsAgregator.Migrations
                 columns: table => new
                 {
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RSSUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,12 +52,13 @@ namespace NewsAgregator.Migrations
 
             migrationBuilder.InsertData(
                 table: "Sources",
-                columns: new[] { "Name", "RSSUrl" },
+                columns: new[] { "Name", "Link", "Type" },
                 values: new object[,]
                 {
-                    { "Лента", "https://lenta.ru/rss" },
-                    { "Mail.ru", "https://news.mail.ru/rss/" },
-                    { "RT", "https://russian.rt.com/rss" }
+                    { "Астрей", "astrey", 1 },
+                    { "Лента", "https://lenta.ru/rss", 0 },
+                    { "Mail.ru", "https://news.mail.ru/rss/", 0 },
+                    { "RT", "https://russian.rt.com/rss", 0 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using NewsAgregator.Data;
 using NewsAgregator.Mapping;
 using NewsAgregator.Services;
-using NewsAgregator.Services.Interafaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +10,8 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 builder.Services.AddDbContext<CustomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-builder.Services.AddSingleton<INewsListener,RSSListener>();
-builder.Services.AddSingleton<INewsListener,TelegramListener>();
+builder.Services.AddSingleton<RSSListener>();
+builder.Services.AddSingleton<TelegramListener>();
 builder.Services.AddHostedService<MainListener>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

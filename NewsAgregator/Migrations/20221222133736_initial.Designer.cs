@@ -12,7 +12,7 @@ using NewsAgregator.Data;
 namespace NewsAgregator.Migrations
 {
     [DbContext(typeof(CustomDbContext))]
-    [Migration("20221221133208_initial")]
+    [Migration("20221222133736_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace NewsAgregator.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("VueProjectBack.Models.NewsItem", b =>
+            modelBuilder.Entity("NewsAgregator.Models.NewsItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -63,14 +63,17 @@ namespace NewsAgregator.Migrations
                     b.ToTable("NewsItems");
                 });
 
-            modelBuilder.Entity("VueProjectBack.Models.Source", b =>
+            modelBuilder.Entity("NewsAgregator.Models.Source", b =>
                 {
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("RSSUrl")
+                    b.Property<string>("Link")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Name");
 
@@ -80,23 +83,32 @@ namespace NewsAgregator.Migrations
                         new
                         {
                             Name = "Mail.ru",
-                            RSSUrl = "https://news.mail.ru/rss/"
+                            Link = "https://news.mail.ru/rss/",
+                            Type = 0
                         },
                         new
                         {
                             Name = "RT",
-                            RSSUrl = "https://russian.rt.com/rss"
+                            Link = "https://russian.rt.com/rss",
+                            Type = 0
                         },
                         new
                         {
                             Name = "Лента",
-                            RSSUrl = "https://lenta.ru/rss"
+                            Link = "https://lenta.ru/rss",
+                            Type = 0
+                        },
+                        new
+                        {
+                            Name = "Астрей",
+                            Link = "astrey",
+                            Type = 1
                         });
                 });
 
-            modelBuilder.Entity("VueProjectBack.Models.NewsItem", b =>
+            modelBuilder.Entity("NewsAgregator.Models.NewsItem", b =>
                 {
-                    b.HasOne("VueProjectBack.Models.Source", "Source")
+                    b.HasOne("NewsAgregator.Models.Source", "Source")
                         .WithMany("NewsItems")
                         .HasForeignKey("SourceName")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -105,7 +117,7 @@ namespace NewsAgregator.Migrations
                     b.Navigation("Source");
                 });
 
-            modelBuilder.Entity("VueProjectBack.Models.Source", b =>
+            modelBuilder.Entity("NewsAgregator.Models.Source", b =>
                 {
                     b.Navigation("NewsItems");
                 });

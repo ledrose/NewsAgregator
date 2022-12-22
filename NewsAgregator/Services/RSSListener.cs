@@ -5,11 +5,10 @@ using System.Xml;
 using HtmlAgilityPack;
 using NewsAgregator.Data;
 using NewsAgregator.Models;
-using NewsAgregator.Services.Interafaces;
 
 namespace NewsAgregator.Services
 {
-    public class RSSListener : INewsListener
+    public class RSSListener 
     {
         private IServiceProvider _serviceProvider;
         public RSSListener(IServiceProvider serviceProvider)
@@ -20,7 +19,7 @@ namespace NewsAgregator.Services
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var sources = scope.ServiceProvider.GetService<CustomDbContext>()!.Sources;
+                var sources = scope.ServiceProvider.GetService<CustomDbContext>()!.Sources.Where(p => p.Type == SourceType.Rss);
                 var list = new List<NewsItem>();
                 foreach (var source in sources)
                 {
@@ -35,7 +34,7 @@ namespace NewsAgregator.Services
                     }
                     try
                     {
-                        sourceList = readUrl(source, lastDate);
+                        sourceList = read(source, lastDate);
                         sourceList.ForEach(p => p.SourceName = source.Name);
                         list.AddRange(sourceList);
                     }
@@ -51,7 +50,7 @@ namespace NewsAgregator.Services
             }
         }
 
-        private List<NewsItem> readUrl(Source source, DateTime lastDate)
+        private List<NewsItem> read(Source source, DateTime lastDate)
         {
             /*
             XmlUrlResolver resolver = new XmlUrlResolver();
@@ -59,7 +58,7 @@ namespace NewsAgregator.Services
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.XmlResolver = resolver;
             */
-            var reader = XmlReader.Create(source.RSSUrl);
+            var reader = XmlReader.Create(source.Link);
             var feed = SyndicationFeed.Load(reader);
             var list = new List<NewsItem>();
             foreach (var item in feed.Items)
