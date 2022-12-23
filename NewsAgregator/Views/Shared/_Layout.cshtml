@@ -22,10 +22,23 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Sources" asp-action="Index">Каналы</a>
-                        </li>
+                        @if (User.IsInRole(Roles.Admin.ToString()))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Sources" asp-action="Index">Каналы</a>
+                            </li>
+                        }
                     </ul>
+                </div>
+                <div class="nav-item ustify-content-end">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Account" asp-action="Logout" class="btn btn-danger btn-rounded">Выйти из пользователя</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-rounded">Войти</a>
+                    }
                 </div>
             </div>
         </nav>

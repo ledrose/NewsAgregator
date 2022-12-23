@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NewsAgregator.Data;
 using NewsAgregator.Models;
@@ -6,15 +7,18 @@ using NewsAgregator.Services;
 
 namespace NewsAgregator.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class SourcesController : Controller
     {
         private readonly CustomDbContext _db;
         private readonly RSSListener _rssListener;
+        private readonly TelegramListener _telegramListener;
 
-        public SourcesController(CustomDbContext context, RSSListener rssListener)
+        public SourcesController(CustomDbContext context, RSSListener rssListener, TelegramListener telegramListener)
         {
             _db = context;
             _rssListener = rssListener;
+            _telegramListener = telegramListener;
         }
 
         public async Task<IActionResult> Index()
@@ -36,7 +40,14 @@ namespace NewsAgregator.Controllers
             {
                 _db.Add(source);
                 _db.SaveChanges();
-                _rssListener.update();
+                if (source.Type==SourceType.Rss)
+                {
+                    await _rssListener.Update();
+                }
+                if (source.Type == SourceType.Telegram)
+                {
+                    await _telegramListener.Update();
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(source);

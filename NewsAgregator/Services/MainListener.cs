@@ -1,4 +1,6 @@
-﻿namespace NewsAgregator.Services
+﻿using TL;
+
+namespace NewsAgregator.Services
 {
     public class MainListener : BackgroundService
     {
@@ -9,13 +11,17 @@
             _rssListener = rssListener;
             _telegramListener = telegramListener;
         }
+        public async Task Update()
+        {
+            await _rssListener.Update();
+            await _telegramListener.Update();
+        }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await _telegramListener.DoLogin("+79138749535");
             while (!stoppingToken.IsCancellationRequested)
             {
-                _rssListener.update();
-                await _telegramListener.DoLogin("+79138749535");
-                _telegramListener.update();
+                await Update();
                 await Task.Delay(new TimeSpan(0, 30, 0));
             }
         }

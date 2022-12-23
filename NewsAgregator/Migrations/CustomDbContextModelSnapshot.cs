@@ -103,6 +103,39 @@ namespace NewsAgregator.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NewsAgregator.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "admin@mail.ru",
+                            Password = "123456",
+                            Role = 1
+                        });
+                });
+
             modelBuilder.Entity("NewsAgregator.Models.NewsItem", b =>
                 {
                     b.HasOne("NewsAgregator.Models.Source", "Source")

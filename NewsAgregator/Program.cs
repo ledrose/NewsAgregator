@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using NewsAgregator.Data;
 using NewsAgregator.Mapping;
@@ -9,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews().AddNewtonsoftJson();
 builder.Services.AddDbContext<CustomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options => {
+       options.LoginPath = new PathString("/Account/Login");
+       options.AccessDeniedPath = new PathString("/Account/Login");
+    });
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddSingleton<RSSListener>();
 builder.Services.AddSingleton<TelegramListener>();
@@ -30,6 +36,8 @@ else
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

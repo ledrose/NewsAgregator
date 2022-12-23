@@ -18,7 +18,7 @@ namespace NewsAgregator.Services
             _serviceProvider = serviceProvider;
             _client = new Client(25875797, "e1f209d3dc7403cbeaa33b003f7d9c44");
         }
-        public async void update()
+        public async Task Update()
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -62,7 +62,7 @@ namespace NewsAgregator.Services
             var list = new List<NewsItem>();
             foreach (Message item in mesList.messages)
             {
-                if (item.Date > lastDate)
+                if (item.Date > lastDate && item.message.Trim()!="")
                 {
                     var a = new NewsItem
                     {

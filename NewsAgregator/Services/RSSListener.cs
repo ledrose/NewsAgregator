@@ -15,7 +15,7 @@ namespace NewsAgregator.Services
         {
             _serviceProvider = serviceProvider;
         }
-        public void update()
+        public async Task Update()
         {
             using (var scope = _serviceProvider.CreateScope())
             {
@@ -27,11 +27,7 @@ namespace NewsAgregator.Services
                         .Where(p => p.SourceName == source.Name)
                         .OrderBy(p => p.CreationDate).LastOrDefault();
                     List<NewsItem> sourceList;
-                    var lastDate = DateTime.MinValue;
-                    if (iLastDate != null)
-                    {
-                        lastDate = iLastDate.CreationDate;
-                    }
+                    var lastDate = iLastDate?.CreationDate ?? DateTime.MinValue;
                     try
                     {
                         sourceList = read(source, lastDate);

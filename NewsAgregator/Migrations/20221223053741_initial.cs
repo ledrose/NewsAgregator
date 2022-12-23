@@ -27,6 +27,21 @@ namespace NewsAgregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NewsItems",
                 columns: table => new
                 {
@@ -61,6 +76,11 @@ namespace NewsAgregator.Migrations
                     { "RT", "https://russian.rt.com/rss", 0 }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Email", "Password", "Role" },
+                values: new object[] { 1, "admin@mail.ru", "123456", 1 });
+
             migrationBuilder.CreateIndex(
                 name: "IX_NewsItems_SourceName",
                 table: "NewsItems",
@@ -72,6 +92,9 @@ namespace NewsAgregator.Migrations
         {
             migrationBuilder.DropTable(
                 name: "NewsItems");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Sources");
