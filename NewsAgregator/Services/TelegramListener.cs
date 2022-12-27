@@ -62,29 +62,36 @@ namespace NewsAgregator.Services
             Enumerable.Range(lastMsgId - 19, 20).ToList().ForEach((i) => mesArr.Add((InputMessageID)(new InputMessageID().id = i)));
             var mesList = (Messages_ChannelMessages)(await _client.Channels_GetMessages(channelInput, mesArr.ToArray()));
 
-            foreach (Message item in mesList.messages)
+            foreach (var item in mesList.messages)
             {
-                if (item.Date > lastDate && item.message.Trim()!="")
+                try
                 {
-                    var catName = "";
-                    if (source.Categories.Where(e => e.Name == catName).IsNullOrEmpty()&&
-                        _categories.Where(e => e.Name == catName).IsNullOrEmpty())
+                    var curItem = (Message)item;
+                    if (curItem.Date > lastDate && curItem.message != "")
                     {
-                        _categories.Add(new Category
+                        var catName = "";
+                        if (source.Categories.Where(e => e.Name == catName).IsNullOrEmpty() &&
+                            _categories.Where(e => e.Name == catName).IsNullOrEmpty())
                         {
-                            Name = catName,
+                            _categories.Add(new Category
+                            {
+                                Name = catName,
+                                SourceName = source.Name,
+                            });
+                        }
+                        var a = new NewsItem
+                        {
                             SourceName = source.Name,
-                        });
+                            CategoryName = catName,
+                            CreationDate = curItem.Date.ToUniversalTime(),
+                            Description = curItem.message ?? "",
+                            Url = "https://t.me/" + source.Link + "/" + curItem.ID
+                        };
+                        _items.Add(a);
                     }
-                    var a = new NewsItem
-                    {
-                        SourceName= source.Name,
-                        CategoryName= catName,
-                        CreationDate = item.Date.ToUniversalTime(),
-                        Description = item.message,
-                        Url = "https://t.me/" + source.Link + "/" + item.ID
-                    };
-                    _items.Add(a);
+                }
+                catch (Exception ex){
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }

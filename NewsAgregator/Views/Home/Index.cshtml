@@ -38,7 +38,7 @@
             $("#list").children().last().after(list);
         }
         else if (startIndex == 0) {
-            $("#list").children().last().after("<p>Новости по вашему запросу не были найдены</p>")
+            $("#list").children().last().after("<p id='error'>Новости по вашему запросу не были найдены</p>")
         }
     }
     async function fetchNews(func) {
@@ -70,6 +70,7 @@
         console.log(result);
         startIndex+=result["items"].length;
         finalPage = result["final"]
+        $("#error").remove();
         $("#list").children(".loader").remove();
 
         addAllToList(result["items"]);
@@ -134,9 +135,11 @@
             console.log($(this));
             if (this.checked) {
                     $(this).siblings(".categoryGroup").find(".categoryCheckbox").prop("disabled", false);
+                    $(this).siblings(".categoryGroup").collapse('show');
             }
             else {
                     $(this).siblings(".categoryGroup").find(".categoryCheckbox").prop("disabled", "disabled");
+                    $(this).siblings(".categoryGroup").collapse('hide');
             }
         });
         fetchNews(()=>{
@@ -157,7 +160,7 @@
                             <label class="form-check-label" for="Check@{@source.Name}">
                                 @source.Name
                             </label>
-                            <div class="categoryGroup">
+                            <div class="categoryGroup collapse show">
                             @foreach (var category in source.Categories)
                             {
                                 if (category != "")
