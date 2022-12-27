@@ -3,6 +3,7 @@ using NewsAgregator.Models;
 using NewsAgregator.ViewModels;
 using System.Diagnostics;
 using NewsAgregator.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace NewsAgregator.Controllers
 {
@@ -19,7 +20,7 @@ namespace NewsAgregator.Controllers
         public IActionResult Index()
         {
             var model = new NewsInputModel();
-            foreach (var source in _db.Sources)
+            foreach (var source in _db.Sources.Include(p => p.Categories))
             {
                 model.Sources.Add(source.Name);
             }

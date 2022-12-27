@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Home Page";
     var sourcesSer = Html.Raw(Json.Serialize(Model.Sources));
+    Console.WriteLine(sourcesSer);
 }
 @section Scripts {
     <script>
@@ -13,7 +14,6 @@
     let searchQuery = "";
     let sources =  JSON.parse('@sourcesSer');
     function formatItem(item) { 
-        console.log(item["creationDate"]);
             let replaceMap = new Map([
                 ["*{url}", item["url"]],
                 ["*{title}", item["title"]],
@@ -45,7 +45,7 @@
         $("#list").children().last().after($("#loader").html());
         var sourcesString = ""
         for (let i=0;i<sources.length;i++) {
-            sourcesString+=`"${sources[i]}",`
+            sourcesString+=`"${sources[i]["name"]}",`
         }
         var postBody = {
             "amount": pageLoadCount,
@@ -71,7 +71,6 @@
         startIndex+=result["items"].length;
         finalPage = result["final"]
         $("#list").children(".loader").remove();
-        //console.log(result);
 
         addAllToList(result["items"]);
         func();

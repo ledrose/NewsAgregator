@@ -12,7 +12,7 @@ using NewsAgregator.Data;
 namespace NewsAgregator.Migrations
 {
     [DbContext(typeof(CustomDbContext))]
-    [Migration("20221223053741_initial")]
+    [Migration("20221227101742_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -25,6 +25,21 @@ namespace NewsAgregator.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("NewsAgregator.Models.Category", b =>
+                {
+                    b.Property<string>("SourceName")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(1);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("SourceName", "Name");
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("NewsAgregator.Models.NewsItem", b =>
                 {
                     b.Property<int>("Id")
@@ -33,9 +48,9 @@ namespace NewsAgregator.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(2);
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
@@ -45,8 +60,8 @@ namespace NewsAgregator.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SourceName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(1);
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -58,7 +73,7 @@ namespace NewsAgregator.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SourceName");
+                    b.HasIndex("SourceName", "CategoryName");
 
                     b.ToTable("NewsItems");
                 });
@@ -139,19 +154,41 @@ namespace NewsAgregator.Migrations
                         });
                 });
 
-            modelBuilder.Entity("NewsAgregator.Models.NewsItem", b =>
+            modelBuilder.Entity("NewsAgregator.Models.Category", b =>
                 {
-                    b.HasOne("NewsAgregator.Models.Source", "Source")
-                        .WithMany("NewsItems")
+                    b.HasOne("NewsAgregator.Models.Source", "Sourse")
+                        .WithMany("Categories")
                         .HasForeignKey("SourceName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Sourse");
+                });
+
+            modelBuilder.Entity("NewsAgregator.Models.NewsItem", b =>
+                {
+                    b.HasOne("NewsAgregator.Models.Source", "Source")
+                        .WithMany("NewsItems")
+                        .HasForeignKey("SourceName");
+
+                    b.HasOne("NewsAgregator.Models.Category", "Category")
+                        .WithMany("NewsItems")
+                        .HasForeignKey("SourceName", "CategoryName");
+
+                    b.Navigation("Category");
+
                     b.Navigation("Source");
+                });
+
+            modelBuilder.Entity("NewsAgregator.Models.Category", b =>
+                {
+                    b.Navigation("NewsItems");
                 });
 
             modelBuilder.Entity("NewsAgregator.Models.Source", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("NewsItems");
                 });
 #pragma warning restore 612, 618

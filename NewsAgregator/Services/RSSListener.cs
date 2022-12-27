@@ -5,12 +5,16 @@ using System.Xml;
 using HtmlAgilityPack;
 using NewsAgregator.Data;
 using NewsAgregator.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace NewsAgregator.Services
 {
     public class RSSListener 
     {
         private IServiceProvider _serviceProvider;
+        private List<Category> _categories = new List<Category>();
+        private List<NewsItem> _items = new List<NewsItem>();
         public RSSListener(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
@@ -19,20 +23,16 @@ namespace NewsAgregator.Services
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var sources = scope.ServiceProvider.GetService<CustomDbContext>()!.Sources.Where(p => p.Type == SourceType.Rss);
-                var list = new List<NewsItem>();
+                var sources = scope.ServiceProvider.GetService<CustomDbContext>()!.Sources.Include(p=> p.Categories).Where(p => p.Type == SourceType.Rss).ToList();
                 foreach (var source in sources)
                 {
                     var iLastDate = scope.ServiceProvider.GetService<CustomDbContext>()!.NewsItems
                         .Where(p => p.SourceName == source.Name)
                         .OrderBy(p => p.CreationDate).LastOrDefault();
-                    List<NewsItem> sourceList;
                     var lastDate = iLastDate?.CreationDate ?? DateTime.MinValue;
                     try
                     {
-                        sourceList = read(source, lastDate);
-                        sourceList.ForEach(p => p.SourceName = source.Name);
-                        list.AddRange(sourceList);
+                        read(source, lastDate);
                     }
                     catch (Exception ex)
                     {
@@ -40,40 +40,41 @@ namespace NewsAgregator.Services
                     }
 
                 }
-
-                scope.ServiceProvider.GetService<CustomDbContext>()!.NewsItems.AddRange(list);
+                scope.ServiceProvider.GetService<CustomDbContext>()!.Categories.AddRange(_categories);
+                scope.ServiceProvider.GetService<CustomDbContext>()!.NewsItems.AddRange(_items);
                 scope.ServiceProvider.GetService<CustomDbContext>()!.SaveChanges();
             }
         }
 
-        private List<NewsItem> read(Source source, DateTime lastDate)
+        private void read(Source source, DateTime lastDate)
         {
-            /*
-            XmlUrlResolver resolver = new XmlUrlResolver();
-            resolver.Credentials = System.Net.CredentialCache.DefaultCredentials;
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.XmlResolver = resolver;
-            */
             var reader = XmlReader.Create(source.Link);
             var feed = SyndicationFeed.Load(reader);
-            var list = new List<NewsItem>();
             foreach (var item in feed.Items)
             {
                 if (item.PublishDate.UtcDateTime > lastDate)
                 {
+                    var catName = item.Categories?.FirstOrDefault()?.Name ?? "";
+                    if (source.Categories!.Where(e => e.Name == catName).IsNullOrEmpty() &&
+                        _categories!.Where(e => e.Name == catName).IsNullOrEmpty()) 
+                    {
+                        _categories.Add(new Category { 
+                            Name= catName,
+                            SourceName= source.Name,
+                        });
+                    } 
                     var a = new NewsItem
                     {
-                        Category = item.Categories?.FirstOrDefault()?.Name ?? "",
                         CreationDate = item.PublishDate.UtcDateTime,
                         Description = checkHtml(item.Summary?.Text ?? ""),
                         Title = item.Title?.Text ?? "",
-                        Url = item.Links?.FirstOrDefault()?.Uri?.OriginalString ?? ""
+                        Url = item.Links?.FirstOrDefault()?.Uri?.OriginalString ?? "",
+                        SourceName = source.Name,
+                        CategoryName = catName
                     };
-                    list.Add(a);
-                    //list.Add(_mapper.Map<NewsItem>(item));
+                    _items.Add(a);
                 }
             }
-            return list;
         }
 
         private String checkHtml(String str)

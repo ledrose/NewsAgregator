@@ -42,27 +42,49 @@ namespace NewsAgregator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    SourceName = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => new { x.SourceName, x.Name });
+                    table.ForeignKey(
+                        name: "FK_Categories_Sources_SourceName",
+                        column: x => x.SourceName,
+                        principalTable: "Sources",
+                        principalColumn: "Name",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NewsItems",
                 columns: table => new
                 {
+                    SourceName = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CategoryName = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SourceName = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NewsItems", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_NewsItems_Categories_SourceName_CategoryName",
+                        columns: x => new { x.SourceName, x.CategoryName },
+                        principalTable: "Categories",
+                        principalColumns: new[] { "SourceName", "Name" });
+                    table.ForeignKey(
                         name: "FK_NewsItems_Sources_SourceName",
                         column: x => x.SourceName,
                         principalTable: "Sources",
-                        principalColumn: "Name",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Name");
                 });
 
             migrationBuilder.InsertData(
@@ -82,9 +104,9 @@ namespace NewsAgregator.Migrations
                 values: new object[] { 1, "admin@mail.ru", "123456", 1 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_NewsItems_SourceName",
+                name: "IX_NewsItems_SourceName_CategoryName",
                 table: "NewsItems",
-                column: "SourceName");
+                columns: new[] { "SourceName", "CategoryName" });
         }
 
         /// <inheritdoc />
@@ -95,6 +117,9 @@ namespace NewsAgregator.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Sources");

@@ -15,7 +15,9 @@ namespace NewsAgregator.Models
         public string Name { get; set; }
         [Required]
         public SourceType Type { get; set; }
+        [Required]
         public string Link { get; set; }
-        public List<NewsItem>? NewsItems { get; set; }
+        public virtual List<NewsItem>? NewsItems { get; set; }
+        public virtual List<Category>? Categories { get; set; }
     }
 }

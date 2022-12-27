@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NewsAgregator.Data;
 using NewsAgregator.Models;
 using System.Collections.Generic;
@@ -14,6 +16,8 @@ namespace NewsAgregator.Services
     {
         private IServiceProvider _serviceProvider;
         private Client _client;
+        private List<Category> _categories = new List<Category>();
+        private List<NewsItem> _items = new List<NewsItem>();
         public TelegramListener(IServiceProvider serviceProvider) {
             _serviceProvider = serviceProvider;
             _client = new Client(25875797, "e1f209d3dc7403cbeaa33b003f7d9c44");
@@ -22,20 +26,17 @@ namespace NewsAgregator.Services
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var sources = scope.ServiceProvider.GetService<CustomDbContext>()!.Sources.Where(p=>p.Type==SourceType.Telegram);
+                var sources = scope.ServiceProvider.GetService<CustomDbContext>()!.Sources.Include(p => p.Categories).Where(p=>p.Type==SourceType.Telegram);
                 var list = new List<NewsItem>();
                 foreach (var source in sources)
                 {
                     var iLastDate = scope.ServiceProvider.GetService<CustomDbContext>()!.NewsItems
                         .Where(p => p.SourceName == source.Name)
                         .OrderBy(p => p.CreationDate).LastOrDefault();
-                    List<NewsItem> sourceList;
                     var lastDate = iLastDate?.CreationDate ?? DateTime.MinValue;
                     try
                     {
-                        sourceList = await read(source, lastDate);
-                        sourceList.ForEach(p => p.SourceName = source.Name);
-                        list.AddRange(sourceList);
+                        await read(source, lastDate);
                     }
                     catch (Exception ex)
                     {
@@ -43,12 +44,13 @@ namespace NewsAgregator.Services
                     }
 
                 }
-                scope.ServiceProvider.GetService<CustomDbContext>()!.NewsItems.AddRange(list);
+                scope.ServiceProvider.GetService<CustomDbContext>()!.Categories.AddRange(_categories);
+                scope.ServiceProvider.GetService<CustomDbContext>()!.NewsItems.AddRange(_items);
                 scope.ServiceProvider.GetService<CustomDbContext>()!.SaveChanges();
             }
         }
        
-        private async Task<List<NewsItem>> read(Source source, DateTime lastDate)
+        private async Task read(Source source, DateTime lastDate)
         {
             var channel = (TL.Channel)(await _client.Contacts_ResolveUsername(source.Link)).Chat;
             var channelInput = new InputChannel(channel.ID, channel.access_hash);
@@ -59,23 +61,32 @@ namespace NewsAgregator.Services
             Console.WriteLine(Enumerable.Range(lastMsgId - 10, lastMsgId + 1));
             Enumerable.Range(lastMsgId - 19, 20).ToList().ForEach((i) => mesArr.Add((InputMessageID)(new InputMessageID().id = i)));
             var mesList = (Messages_ChannelMessages)(await _client.Channels_GetMessages(channelInput, mesArr.ToArray()));
-            var list = new List<NewsItem>();
+
             foreach (Message item in mesList.messages)
             {
                 if (item.Date > lastDate && item.message.Trim()!="")
                 {
+                    var catName = "";
+                    if (source.Categories.Where(e => e.Name == catName).IsNullOrEmpty()&&
+                        _categories.Where(e => e.Name == catName).IsNullOrEmpty())
+                    {
+                        _categories.Add(new Category
+                        {
+                            Name = catName,
+                            SourceName = source.Name,
+                        });
+                    }
                     var a = new NewsItem
                     {
-                        Category = "",
-                        Title = "",
+                        SourceName= source.Name,
+                        CategoryName= catName,
                         CreationDate = item.Date.ToUniversalTime(),
                         Description = item.message,
                         Url = "https://t.me/" + source.Link + "/" + item.ID
                     };
-                    list.Add(a);
+                    _items.Add(a);
                 }
             }
-            return list;
         }
         public async Task DoLogin(string loginInfo)
         {
