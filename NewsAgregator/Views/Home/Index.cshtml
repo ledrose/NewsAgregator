@@ -95,9 +95,21 @@
      };
      function initData() {
          sources = [];
-         $(".sourceCheckbox").each((i, el) => {
-             if (el.checked) 
-                sources.push(el.value);
+         $("[class*='sourceCheckbox']").each((i, el) => {
+             if (el.checked) {
+                let a = [];
+                $(`[class*='catCheck${el.value}']`).each((j,el2) => {
+                    console.log(el.value);
+                    if (el2.checked) {
+                        a.push(el2.value)
+                    }
+                })
+                a.push("");
+                sources.push({
+                    "name": el.value,
+                    "categories" : a
+                });
+             }
          });
          startTime = $("#startTime").val();
          endTime = $("#endTime").val();
@@ -117,24 +129,48 @@
      }
      onload = (event) => {
         initData();
+        console.log(sources);
+        $("#changeEventBase").on('change', '.sourceCheckbox', function() {
+            console.log($(this));
+            if (this.checked) {
+                    $(this).siblings(".categoryGroup").find(".categoryCheckbox").prop("disabled", false);
+            }
+            else {
+                    $(this).siblings(".categoryGroup").find(".categoryCheckbox").prop("disabled", "disabled");
+            }
+        });
         fetchNews(()=>{
             $(window).one('resize scroll', handleScroll);
-        })
+        });
      };
      
 </script>
 }
 <div class="row justify-content-evenly">
     <div class="col-3">
-        <div class=" p-2 bg-info rounded-3 mt-5 position-fixed">
-            <form onsubmit="event.preventDefault(); resetList()">
+        <div class=" p-2 bg-info rounded-3 mt-5">
+            <form onsubmit="event.preventDefault(); resetList()" id="changeEventBase">
                     @foreach (var source in Model.Sources)
                     {
-                        <div class="form-check">
-                            <input class="form-check-input sourceCheckbox" checked type="checkbox" value="@source" on id="Check@source">
-                            <label class="form-check-label" for="Check@source">
-                                @source
+                    <div class="form-check">
+                            <input class="form-check-input sourceCheckbox" checked type="checkbox" value="@source.Name" on id="Check@{@source.Name}">
+                            <label class="form-check-label" for="Check@{@source.Name}">
+                                @source.Name
                             </label>
+                            <div class="categoryGroup">
+                            @foreach (var category in source.Categories)
+                            {
+                                if (category != "")
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input categoryCheckbox catCheck@{@source.Name}" checked type="checkbox" value="@category" on id="Check@{@category}">
+                                        <label class="form-check-label" for="Check@{@category}">
+                                            @category
+                                        </label>
+                                    </div>
+                                }
+                            }
+                            </div>
                         </div>
                     }
                     <label class="form-check-label" for="startTime">Начальное время</label>

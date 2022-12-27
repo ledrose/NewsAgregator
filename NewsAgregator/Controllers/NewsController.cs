@@ -43,13 +43,18 @@ namespace NewsAgregator.Controllers
                 if (data.EndTime>minDateTime)
                 {
                     endTime = data.EndTime.AddHours(-data.TimeOffsetInHours);
-                }                
+                }
+                var catList = data.Sources.SelectMany(x => x.Categories);
+                var sourceList = data.Sources.Select(x => x.Name);
+                var categories = _db.Categories.Where(c => catList.Contains(c.Name));
                 var items = _db.NewsItems
                     .Where(p => 
-                        data.Sources.Contains(p.SourceName) &&
+                        catList.Contains(p.CategoryName) &&
+                        sourceList.Contains(p.SourceName) &&
                         p.CreationDate>startTime &&
                         p.CreationDate<endTime &&
-                        p.Title.Contains(data.SearchQuery))
+                        (p.Title.Contains(data.SearchQuery) ||
+                        p.Description.Contains(data.SearchQuery)))
                     .OrderByDescending(p => p.CreationDate).Skip(startIndex).Take(amount)
                     .ToList();
                 items.ForEach(p => p.CreationDate = p.CreationDate.AddHours(data.TimeOffsetInHours));
@@ -67,7 +72,6 @@ namespace NewsAgregator.Controllers
             }
 
         }
-        
     }
 }
 

@@ -22,7 +22,13 @@ namespace NewsAgregator.Controllers
             var model = new NewsInputModel();
             foreach (var source in _db.Sources.Include(p => p.Categories))
             {
-                model.Sources.Add(source.Name);
+                List<string> categories = new List<string>();
+                source.Categories!.ForEach(p => categories.Add(p.Name));
+                model.Sources.Add(new SourceInputModel
+                {
+                    Name = source.Name,
+                    Categories = categories
+                });
             }
             return View(model);
         }
